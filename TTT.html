@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<!-- Inc -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+
+
+<!-- MODALS.START -->
+
+<!-- Tic Tac Toe Modal -->
+<div class="modal fade" id="TTT" data-backdrop="static">
+ <div class="modal-dialog modal-sm">
+  <div class="modal-content d-flex">
+
+    <!-- Modal body -->
+    <div class="modal-body d-flex justify-content-center">
+     <h3 id="TTT_body" class="text-info"></h3>
+    </div>
+
+    <!-- Modal footer -->
+    <div class="modal-footer d-flex flex-row justify-content-around">
+     <button class="btn btn-success col-sm-5" data-dismiss="modal" onclick="Play_again()">Play again</button>
+     <button class="btn btn-danger col-sm-5" data-dismiss="modal" onclick="Quit()">Quit</button>
+    </div>
+
+  </div>
+ </div>
+</div>
+
+<!-- MODALS.END -->
+
+<!-- HTML -->
+<div style="margin: 10px 0 0 10px;">
+ <p id="p_1">X: <span id="r_1" style="color: red;"></span></p>
+ <p id="p_2">O: <span id="r_2" style="color: red;"></span></p>
+
+ <p id="d" onclick="show()">Draw: <span id="r_d" style="color: red;"></span></p>
+</div>
+
+<!-- Tic Tac Toe board -->
+<span class="board d-flex flex-column">
+  <span class="d-flex flex-row">
+   <div class="box border border-dark border-top-0  border-left-0"></div>
+   <div class="box border border-dark border-top-0  border-left-0"></div>
+   <div class="box border border-dark border-top-0  border-left-0 border-right-0"></div>
+  </span>
+
+  <span class="d-flex flex-row">
+   <div class="box border border-dark border-top-0  border-left-0"></div>
+   <div class="box border border-dark border-top-0  border-left-0"></div>
+   <div class="box border border-dark border-top-0  border-left-0 border-right-0"></div>
+  </span>
+
+  <span class="d-flex flex-row">
+   <div class="box border border-dark border-top-0  border-left-0 border-bottom-0"></div>
+   <div class="box border border-dark border-top-0  border-left-0 border-bottom-0"></div>
+   <div class="box"></div>
+  </span>
+</span>
+
+<!-- Style -->
+<style>
+.box {
+ width: 100px;
+ height: 100px;
+
+ font-size: 60px;
+ text-align: center;
+ }
+.board {
+ margin-top: 2%;
+ margin-left: 39%;
+ }
+</style>
+
+<!-- Script -->
+<script>
+// who's turn control system
+var myMove = 0;
+
+// who's field control system
+var myControl = {
+ 0 : [],
+ 1 : []
+ };
+
+// Win situations
+var win = [
+ [0, 1, 2],
+ [3, 4, 5],
+ [6, 7, 8],
+
+ [0, 3, 6],
+ [1, 4, 7],
+ [2, 5, 8],
+
+ [0, 4, 8],
+ [2, 4, 6]
+ ];
+
+// setUp
+var rd = 0;
+var p1r1 = 0;
+var p2r2 = 0;
+
+var Draw = 0;
+
+var myWin = 0; // win 1=>Player_1  2=>Player_2
+var myWinCombo = [];
+
+for(let setUp = 0; setUp < $(".box").length; setUp++) {
+ $($(".box")[setUp]).click(function() {
+  var me = this;
+  $(this).off();
+
+  // who played who wins control system
+  if(myMove == 0) { $(this).html("X"); winner(setUp, myMove); myMove = 1; }
+  else if(myMove == 1) { $(this).html("O"); winner(setUp, myMove); myMove = 0; }
+
+  // is it draw yet?
+  if(myWin == 0 && Draw == 9) { $("#TTT_body").html("Draw!"); $("#TTT").modal(); rd += 1; $("#r_d").html(rd); }
+  }
+ );
+}
+
+// winner
+function winner(setUp, myMove) {
+ // field ownership
+ myControl[myMove].push(setUp);
+
+ // combo check
+ for(var i = 0; i < win.length; i++) {
+  if(myWinCombo.length != 3) { myWinCombo = []; }
+  if(myWinCombo.length != 3) { for(var j = 0; j < win[i].length; j++) { if($.inArray(win[i][j], myControl[myMove]) !== -1) { myWinCombo.push(win[i][j]); } } }
+
+  // if win
+  if(myWinCombo.length == 3 && myWin == 0) { if(myMove == 0) { myWin = 1; } if(myMove == 1) { myWin = 2; } }
+  }
+ if(myWin == 1) { $("#TTT_body").html("Player 1 wins!"); $("#TTT").modal(); p1r1 += 1; $("#r_1").html(p1r1); }
+ else if(myWin == 2) { $("#TTT_body").html("Player 2 wins!"); $("#TTT").modal(); p2r2 += 1; $("#r_2").html(p2r2); }
+
+ // count moves to draw
+ Draw++;
+ }
+
+// Play again
+function Play_again() {
+ // re-setUp
+ Quit();
+ $(".box").empty();
+
+ Draw = 0;
+
+ myWin = 0; // win 1=>Player_1  2=>Player_2
+ myWinCombo = [];
+
+ myControl[0] = [];
+ myControl[1] = [];
+
+ for(let setUp = 0; setUp < $(".box").length; setUp++) {
+  $($(".box")[setUp]).click(function() {
+   var me = this;
+   $(this).off();
+
+   // who played who wins control system
+   if(myMove == 0) { $(this).html("X"); winner(setUp, myMove); myMove = 1; }
+   else if(myMove == 1) { $(this).html("O"); winner(setUp, myMove); myMove = 0; }
+
+   // is it draw yet?
+   if(myWin == 0 && Draw == 9) { $("#TTT_body").html("Draw!"); $("#TTT").modal(); rd += 1; $("#r_d").html(rd); }
+   }
+  );
+ }
+}
+
+// No
+function Quit() { $(".box").off(); }
+
+function show() { console.log("Move:"); console.log(myControl[0]); console.log(myControl[1]); console.log(""); }
+</script>
